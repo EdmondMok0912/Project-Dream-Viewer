@@ -36,8 +36,8 @@ export async function POST(req: NextRequest) {
     
     const inputContext = JSON.stringify(body, null, 2);
 
-    const primaryModel = process.env.PRIMARY_MODEL || "gemma-4-31b-it";
-    const fallbackModel = process.env.FALLBACK_MODEL || "gemma-4-26b-a4b-it";
+    const primaryModel = process.env.PRIMARY_MODEL || "gemini-3.5-flash";
+    const fallbackModel = process.env.FALLBACK_MODEL || "gemini-3.1-flash-lite";
 
     async function generateWithFallback(contents: string, config: any) {
       try {

@@ -1,26 +1,20 @@
-# Dream Reflection App
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-AI-assisted dream reflection app with risk screening, structured Jungian-style reports, archive import, and cross-dream comparison.
+# Run and deploy your AI Studio app
 
-## Overview
+This contains everything you need to run your app locally.
 
-Dream Reflection App is a full-stack monorepo for AI-assisted dream reflection and journaling.
+View your app in AI Studio: https://ai.studio/apps/6ac10095-3d0e-437d-b426-67dc954edb0b
 
-It helps users:
-- submit a single dream for structured analysis,
-- receive a report with themes, emotions, symbols, and reflection prompts,
-- export results as Markdown or JSON,
-- import previous records into a local archive,
-- compare recurring patterns across multiple dreams.
+## Run Locally
 
-The system includes safety-aware screening so potentially harmful content can be blocked from general interpretation and routed to support guidance instead.
+**Prerequisites:**  Node.js
 
-## Features
 
-- Single-dream analysis with structured report output.
-- Risk screening before general interpretation.
-- Markdown and JSON export for later review.
-- Archive import for previously exported dream records.
-- Cross-dream comparison for recurring symbols, emotions, and themes.
-- Next.js frontend with backend API and shared schemas.
-- Local fallback behavior for comparison when the backend compare API is unavailable.
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
