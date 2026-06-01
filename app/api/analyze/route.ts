@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { dreamInputSchema, RiskClassification, AnalysisReport } from "@/lib/schemas";
-import { RISK_PROMPT, ANALYSIS_PROMPT } from "@/lib/prompts";
+import { getRiskPrompt, getAnalysisPrompt } from "@/lib/prompts";
 
 export const maxDuration = 60; // Allow more time for generation
 
@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
   try {
     const customApiKey = req.headers.get("x-custom-api-key") || process.env.GEMINI_API_KEY;
     const ai = getGoogleGenAI(customApiKey);
+    const lang = req.headers.get("x-app-lang") || "zh";
     const body = await req.json();
     const parseResult = dreamInputSchema.safeParse(body);
     
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     const riskResponse = await generateWithFallback(
       "Evaluate this dream input:\n\n" + inputContext,
       {
-        systemInstruction: RISK_PROMPT,
+        systemInstruction: getRiskPrompt(lang),
         responseMimeType: "application/json",
       }
     );
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         type: "CRISIS_ABORT",
         classification: riskData,
-        message: "系統偵測到高度風險內容。我們無法繼續進行常規夢境分析。如果您或他人正處於危機之中，請立即尋求專業協助。"
+        message: lang === "en" ? "System detected high-risk content. Routine analysis paused. If you are in crisis, please seek professional help immediately." : "系統偵測到高度風險內容。我們無法繼續進行常規夢境分析。如果您或他人正處於危機之中，請立即尋求專業協助。"
       }); 
     }
 
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
     const analysisResponse = await generateWithFallback(
       "Please analyze this dream input:\n\n" + inputContext,
       {
-        systemInstruction: ANALYSIS_PROMPT,
+        systemInstruction: getAnalysisPrompt(lang),
         responseMimeType: "application/json",
       }
     );

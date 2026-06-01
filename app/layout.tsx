@@ -1,15 +1,20 @@
 import type {Metadata} from 'next';
-import './globals.css'; // Global styles
+import './globals.css';
+import { I18nProvider } from '@/components/i18n-provider';
 
 export const metadata: Metadata = {
-  title: 'My Google AI Studio App',
-  description: 'My Google AI Studio App',
+  title: 'Project Dream Viewer',
+  description: 'Project Dream Viewer',
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <I18nProvider>
+          {children}
+        </I18nProvider>
+      </body>
     </html>
   );
 }

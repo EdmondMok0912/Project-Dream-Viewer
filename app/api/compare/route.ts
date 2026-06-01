@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
-const COMPARE_PROMPT = `
+const getComparePrompt = (lang: string) => `
 You are an analytical module in a dream reflection system. Your task is to compare multiple dream reports and identify patterns, recurring themes, and emotional shifts over time.
 
 Input will be an array of JSON objects representing multiple dreams, containing their dates, titles, summaries, and emotions.
@@ -11,10 +11,10 @@ Analyze the patterns and output a strictly formatted JSON object exactly matchin
   "recurringSymbols": ["symbol1", "symbol2"],
   "recurringEmotions": ["emotion1", "emotion2"],
   "commonThemes": ["theme1"],
-  "timelineAnalysis": "String (A brief paragraph analyzing any shifts, developments, or recurring patterns across these dreams over time. Write in Traditional Chinese.)"
+  "timelineAnalysis": "String (A brief paragraph analyzing any shifts, developments, or recurring patterns across these dreams over time. Write in ${lang === "en" ? "English" : "Traditional Chinese"}.)"
 }
 
-Keep all string values inside the JSON in Traditional Chinese (except the keys themselves).
+Keep all string values inside the JSON in ${lang === "en" ? "English" : "Traditional Chinese"} (except the keys themselves).
 `;
 
 function getGoogleGenAI(apiKey: string | undefined): GoogleGenAI {
@@ -27,6 +27,7 @@ function getGoogleGenAI(apiKey: string | undefined): GoogleGenAI {
 export async function POST(req: NextRequest) {
   try {
     const customApiKey = req.headers.get("x-custom-api-key") || process.env.GEMINI_API_KEY;
+    const lang = req.headers.get("x-app-lang") || "zh";
     const ai = getGoogleGenAI(customApiKey);
     const body = await req.json();
     
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
     const response = await generateWithFallback(
       "Please compare these dreams and find the recurring patterns:\n\n" + inputContext,
       {
-        systemInstruction: COMPARE_PROMPT,
+        systemInstruction: getComparePrompt(lang),
         responseMimeType: "application/json",
       }
     );
