@@ -40,6 +40,7 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
     handleSubmit,
     watch,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<DreamInput>({
     resolver: zodResolver(dreamInputSchema),
@@ -157,7 +158,22 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
               {t("form_wake_emotion_label")}
               <WordCount text={formValues.wakingEmotion} suggested="30" />
             </label>
-            <Input {...register("wakingEmotion")} list="emotions-list" placeholder={t("form_wake_emotion_placeholder")} />
+            <Input {...register("wakingEmotion")} placeholder={t("form_wake_emotion_placeholder")} />
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {emotions.map(emo => (
+                <button 
+                  key={`wake-${emo}`} type="button" 
+                  onClick={() => {
+                     const current = formValues.wakingEmotion || "";
+                     const valToAdd = emo.split(" ")[0]; // Just take the short word if it has English part
+                     setValue("wakingEmotion", current ? `${current}, ${valToAdd}` : valToAdd, { shouldValidate: true, shouldDirty: true });
+                  }}
+                  className="text-[11px] px-2.5 py-1 bg-stone-100/80 text-stone-600 rounded-full hover:bg-stone-200 transition-colors border border-stone-200/60"
+                >
+                  {emo}
+                </button>
+              ))}
+            </div>
             {errors.wakingEmotion && <p className="text-xs text-red-500">{errors.wakingEmotion.message}</p>}
           </div>
           <div className="space-y-2">
@@ -165,16 +181,25 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
               {t("form_dream_emotion_label")}
               <WordCount text={formValues.dreamEmotion} suggested="30" />
             </label>
-            <Input {...register("dreamEmotion")} list="emotions-list" placeholder={t("form_dream_emotion_placeholder")} />
+            <Input {...register("dreamEmotion")} placeholder={t("form_dream_emotion_placeholder")} />
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {emotions.map(emo => (
+                <button 
+                  key={`dream-${emo}`} type="button" 
+                  onClick={() => {
+                     const current = formValues.dreamEmotion || "";
+                     const valToAdd = emo.split(" ")[0];
+                     setValue("dreamEmotion", current ? `${current}, ${valToAdd}` : valToAdd, { shouldValidate: true, shouldDirty: true });
+                  }}
+                  className="text-[11px] px-2.5 py-1 bg-stone-100/80 text-stone-600 rounded-full hover:bg-stone-200 transition-colors border border-stone-200/60"
+                >
+                  {emo}
+                </button>
+              ))}
+            </div>
             {errors.dreamEmotion && <p className="text-xs text-red-500">{errors.dreamEmotion.message}</p>}
           </div>
         </div>
-        
-        <datalist id="emotions-list">
-          {emotions.map((emo) => (
-            <option key={emo} value={emo} />
-          ))}
-        </datalist>
       </div>
 
       <div className="space-y-4 rounded-xl border border-stone-200 bg-white p-6 shadow-sm">

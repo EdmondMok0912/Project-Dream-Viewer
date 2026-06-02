@@ -91,7 +91,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-stone-50 pb-20 selection:bg-stone-200 text-stone-900">
-      <div className="bg-white border-b border-stone-200 sticky top-0 z-10 shadow-sm relative pt-4 pb-2 px-4 mb-10">
+      <div className="bg-white border-b border-stone-200 shadow-sm relative pt-4 pb-2 px-4 mb-10">
         <div className="max-w-5xl mx-auto">
           <Header />
         </div>
