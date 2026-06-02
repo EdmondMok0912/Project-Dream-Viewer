@@ -44,6 +44,12 @@ export default function Home() {
          return;
       }
 
+      if (response.status === 503) {
+         alert(lang === "en" ? "The AI service is currently experiencing high demand. Please try again later." : "AI 服務器目前正處於高負載狀態，請稍後再試。");
+         setAppState("FORM");
+         return;
+      }
+
       let result;
       try {
         result = await response.json();

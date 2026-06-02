@@ -49,11 +49,68 @@ export async function POST(req: NextRequest) {
     const primaryModel = process.env.PRIMARY_MODEL || "gemma-4-31b-it";
     const fallbackModel = process.env.FALLBACK_MODEL || "gemma-4-26b-a4b-it";
 
+    async function callOpenRouterFallback(systemInstruction: string, userContent: string): Promise<string> {
+      const openRouterApiKey = process.env.OPENROUTER_API_KEY;
+      if (!openRouterApiKey) throw new Error("OPENROUTER_API_KEY is missing");
+
+      const orModels = ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free"];
+      let lastError = null;
+
+      for (const model of orModels) {
+        try {
+          console.log(`Trying OpenRouter model: ${model}`);
+          const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${openRouterApiKey}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              model: model,
+              messages: [
+                { role: "system", content: systemInstruction },
+                { role: "user", content: userContent }
+              ]
+            })
+          });
+
+          if (!res.ok) {
+            throw new Error(`OpenRouter ${model} Error: ${res.status} ${await res.text()}`);
+          }
+
+          const data = await res.json();
+          if (data.choices && data.choices[0] && data.choices[0].message) {
+            return data.choices[0].message.content;
+          } else {
+            throw new Error(`Unexpected OpenRouter response format: ${JSON.stringify(data)}`);
+          }
+        } catch (e) {
+          console.error(`OpenRouter model ${model} failed`, e);
+          lastError = e;
+        }
+      }
+      throw lastError || new Error("All OpenRouter fallbacks failed");
+    }
+
     async function generateWithFallback(contents: string, config: any) {
       try {
         return await ai.models.generateContent({ model: primaryModel, contents, config });
-      } catch (error) {
-        console.warn(`Primary model ${primaryModel} failed, falling back to ${fallbackModel}`, error);
+      } catch (error: any) {
+        console.warn(`Primary model ${primaryModel} failed`, error?.message || error);
+        
+        const isRateLimitedOrTimeout = error?.status === 429 || error?.status === 503 || error?.status === 504 || error?.status === "UNAVAILABLE" || error?.name === "TimeoutError" || (error?.message && (error.message.includes("503") || error.message.includes("504") || error.message.includes("timeout")));
+
+        if (isRateLimitedOrTimeout && process.env.OPENROUTER_API_KEY) {
+          console.log("Rate limited / Timeout from Gemini, falling back to OpenRouter...");
+          try {
+            const resultText = await callOpenRouterFallback(config.systemInstruction || "", contents);
+            return { text: resultText };
+          } catch (openRouterError) {
+            console.error("OpenRouter fallback also failed", openRouterError);
+          }
+        }
+
+        console.log(`Falling back to secondary Gemini model ${fallbackModel}`);
         return await ai.models.generateContent({ model: fallbackModel, contents, config });
       }
     }
@@ -117,6 +174,15 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error("API /analyze Error:", error);
+
+    const isOverloaded = error?.status === 503 || error?.status === "UNAVAILABLE" || (error?.message && error.message.includes("503"));
+    if (isOverloaded) {
+      return NextResponse.json({ 
+        error: "Service Unavailable", 
+        message: "The AI model is currently experiencing high demand." 
+      }, { status: 503 });
+    }
+
     return NextResponse.json({ 
       error: "Internal Server Error", 
       message: error instanceof Error ? error.message : String(error),
