@@ -39,7 +39,7 @@ export default function Home() {
       }
 
       if (response.status === 504) {
-         alert(lang === "en" ? "Server timeout. The analysis took too long." : "伺服器超時，分析花費了太長時間，請稍後再試。");
+         alert(lang === "en" ? "Server timeout (504). The analysis took too long. Please try shortening your content, or try again later." : "伺服器超時 (504)，分析花費了太長時間。由於伺服器有處理時間限制，請嘗試精簡您的夢境內容與細節後再試一次。");
          setAppState("FORM");
          return;
       }

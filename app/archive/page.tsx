@@ -80,7 +80,7 @@ export default function ArchivePage() {
       }
 
       if (res.status === 504) {
-         alert(lang === "en" ? "Server timeout. The comparison took too long." : "伺服器超時，比較過程花費了太長時間，請稍後再試。");
+         alert(lang === "en" ? "Server timeout (504). The comparison took too long. Please try selecting fewer items to compare." : "伺服器超時 (504)，比較過程花費了太長時間。由於伺服器有處理時間限制，請嘗試減少比較的夢境數量後再試一次。");
          return;
       }
 

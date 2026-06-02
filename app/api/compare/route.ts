@@ -38,7 +38,7 @@ function getGoogleGenAI(): GoogleGenAI {
 export async function POST(req: NextRequest) {
   try {
     const contentLength = req.headers.get("content-length");
-    if (contentLength && parseInt(contentLength, 10) > 900 * 1024) {
+    if (contentLength && parseInt(contentLength, 10) > 3 * 1024 * 1024) {
       return NextResponse.json({ error: "Payload too large" }, { status: 413 });
     }
 
