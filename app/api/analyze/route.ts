@@ -5,7 +5,18 @@ import { getRiskPrompt, getAnalysisPrompt } from "@/lib/prompts";
 
 export const maxDuration = 60; // Allow more time for generation
 
-function getGoogleGenAI(apiKey: string | undefined): GoogleGenAI {
+function sanitizeInput(text: string): boolean {
+  const blacklist = [
+    "ignore previous", "ignore all", "system prompt",
+    "instruction", "bypass", "jailbreak", "forget everything",
+    "ignore above", "you are now"
+  ];
+  const lower = text.toLowerCase();
+  return !blacklist.some(keyword => lower.includes(keyword));
+}
+
+function getGoogleGenAI(): GoogleGenAI {
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY environment variable is missing.");
   }
@@ -14,8 +25,12 @@ function getGoogleGenAI(apiKey: string | undefined): GoogleGenAI {
 
 export async function POST(req: NextRequest) {
   try {
-    const customApiKey = req.headers.get("x-custom-api-key") || process.env.GEMINI_API_KEY;
-    const ai = getGoogleGenAI(customApiKey);
+    const contentLength = req.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > 900 * 1024) {
+      return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+    }
+
+    const ai = getGoogleGenAI();
     const lang = req.headers.get("x-app-lang") || "zh";
     const body = await req.json();
     const parseResult = dreamInputSchema.safeParse(body);
@@ -26,6 +41,10 @@ export async function POST(req: NextRequest) {
     
     const dreamInput = parseResult.data;
     const inputContext = JSON.stringify(dreamInput, null, 2);
+
+    if (!sanitizeInput(inputContext)) {
+      return NextResponse.json({ error: "Invalid prompt content detected." }, { status: 400 });
+    }
 
     const primaryModel = process.env.PRIMARY_MODEL || "gemma-4-31b-it";
     const fallbackModel = process.env.FALLBACK_MODEL || "gemma-4-26b-a4b-it";

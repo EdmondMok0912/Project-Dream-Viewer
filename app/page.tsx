@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DreamForm } from "@/components/dream-form";
 import { ReportView } from "@/components/report-view";
 import { CrisisStop } from "@/components/crisis-stop";
@@ -15,18 +15,6 @@ export default function Home() {
   const [appState, setAppState] = useState<AppState>("FORM");
   const [inputData, setInputData] = useState<DreamInput | null>(null);
   const [reportData, setReportData] = useState<AnalysisReport | null>(null);
-  const [customApiKey, setCustomApiKey] = useState("");
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCustomApiKey(localStorage.getItem("custom_gemini_key") || "");
-  }, []);
-
-  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setCustomApiKey(val);
-    localStorage.setItem("custom_gemini_key", val);
-  };
 
   const handleSubmit = async (data: DreamInput) => {
     setAppState("LOADING");
@@ -37,9 +25,6 @@ export default function Home() {
         "Content-Type": "application/json",
         "x-app-lang": lang
       };
-      if (customApiKey) {
-        headers["x-custom-api-key"] = customApiKey;
-      }
 
       const response = await fetch("/api/analyze", {
         method: "POST",
@@ -48,6 +33,18 @@ export default function Home() {
       });
 
       const result = await response.json();
+
+      if (response.status === 413) {
+         alert(lang === "en" ? "Input too large." : "輸入字數過多，請縮減內容。");
+         setAppState("FORM");
+         return;
+      }
+
+      if (response.status === 400 && result.error === "Invalid prompt content detected.") {
+         alert(lang === "en" ? "Invalid characters or restricted keywords detected." : "檢測到無效字元或嘗試繞過系統的指令，拒絕請求。");
+         setAppState("FORM");
+         return;
+      }
 
       if (response.status === 403 || result.type === "CRISIS_ABORT") {
          setAppState("CRISIS");
@@ -77,7 +74,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-stone-50 pb-20 selection:bg-stone-200 text-stone-900">
-      <div className="bg-white border-b border-stone-200 sticky top-0 z-10 shadow-sm relative pt-4 pb-2 px-4 shadow-sm mb-10">
+      <div className="bg-white border-b border-stone-200 sticky top-0 z-10 shadow-sm relative pt-4 pb-2 px-4 mb-10">
         <div className="max-w-5xl mx-auto">
           <Header />
         </div>
@@ -85,38 +82,31 @@ export default function Home() {
 
       <div className="max-w-5xl mx-auto px-4">
         
-        {appState === "FORM" && (
-          <div className="space-y-8 animate-in fade-in fill-mode-both duration-500">
+        <div style={{ display: (appState === "FORM" || appState === "LOADING") ? "block" : "none" }}>
+          <div className={`space-y-8 animate-in fade-in fill-mode-both duration-500 ${appState === "LOADING" ? "pointer-events-none opacity-60 grayscale-[30%]" : ""}`}>
             <div className="max-w-2xl">
               <h1 className="text-3xl font-semibold tracking-tight text-stone-900 mb-3">{t("title")}</h1>
               <p className="text-base text-stone-500 leading-relaxed mb-6">
                 {t("description")}
               </p>
-
-              <div className="bg-stone-100 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center gap-3 border border-stone-200 mb-8">
-                <span className="text-sm font-medium text-stone-700 whitespace-nowrap">{t("api_key_label")}</span>
-                <input 
-                  type="password" 
-                  value={customApiKey} 
-                  onChange={handleApiKeyChange} 
-                  className="flex-1 bg-white border border-stone-300 outline-none rounded-md px-3 py-1.5 text-sm focus:border-orange-500 transition-colors" 
-                  placeholder={t("api_key_placeholder")}
-                />
-              </div>
             </div>
-            <DreamForm onSubmit={handleSubmit} isSubmitting={false} />
+            <DreamForm onSubmit={handleSubmit} isSubmitting={appState === "LOADING"} />
           </div>
-        )}
+        </div>
 
         {appState === "LOADING" && (
-          <div className="flex flex-col items-center justify-center py-32 space-y-4 animate-in fade-in fill-mode-both duration-500">
-            <div className="h-8 w-8 rounded-full border-2 border-stone-900 border-r-transparent animate-spin"></div>
-            <p className="text-stone-500 font-medium">{t("form_submitting")}</p>
+          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+            <div className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-stone-200 flex flex-col items-center justify-center space-y-4">
+              <div className="h-8 w-8 rounded-full border-2 border-orange-500 border-r-transparent animate-spin"></div>
+              <p className="text-stone-700 font-medium">{t("form_submitting")}</p>
+            </div>
           </div>
         )}
 
         {appState === "REPORT" && reportData && inputData && (
-          <ReportView report={reportData} input={inputData} onReset={handleReset} />
+          <div className="animate-in fade-in fill-mode-both duration-500">
+            <ReportView report={reportData} input={inputData} onReset={handleReset} />
+          </div>
         )}
 
         {appState === "CRISIS" && (

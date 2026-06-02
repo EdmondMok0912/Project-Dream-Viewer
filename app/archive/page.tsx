@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ExportedDream } from "@/lib/schemas";
 import { UploadCloud, Activity, Trash2 } from "lucide-react";
@@ -12,19 +12,7 @@ export default function ArchivePage() {
   const [dreams, setDreams] = useState<ExportedDream[]>([]);
   const [compareReport, setCompareReport] = useState<any>(null);
   const [isComparing, setIsComparing] = useState(false);
-  const [customApiKey, setCustomApiKey] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCustomApiKey(localStorage.getItem("custom_gemini_key") || "");
-  }, []);
-
-  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setCustomApiKey(val);
-    localStorage.setItem("custom_gemini_key", val);
-  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -79,9 +67,6 @@ export default function ArchivePage() {
         "Content-Type": "application/json",
         "x-app-lang": lang
       };
-      if (customApiKey) {
-        headers["x-custom-api-key"] = customApiKey;
-      }
 
       const res = await fetch("/api/compare", {
         method: "POST",
@@ -130,17 +115,6 @@ export default function ArchivePage() {
             <Button onClick={() => fileInputRef.current?.click()}>
               {t("archive_upload_btn")}
             </Button>
-
-            <div className="bg-stone-100 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center gap-3 border border-stone-200 mt-6 max-w-md mx-auto text-left">
-              <span className="text-sm font-medium text-stone-700 whitespace-nowrap">{t("api_key_label")}</span>
-              <input 
-                type="password" 
-                value={customApiKey} 
-                onChange={handleApiKeyChange} 
-                className="flex-1 bg-white border border-stone-300 outline-none rounded-md px-3 py-1.5 text-sm focus:border-orange-500 transition-colors" 
-                placeholder={t("api_key_placeholder")}
-              />
-            </div>
          </div>
 
          {dreams.length > 0 && (
