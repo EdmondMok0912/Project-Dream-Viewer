@@ -9,6 +9,25 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { useI18n } from "./i18n-provider";
 
+const WordCount = ({ text, suggested }: { text?: string, suggested?: string }) => {
+  const { lang } = useI18n();
+  const count = text?.trim().length || 0;
+  
+  if (lang === "en") {
+    return (
+      <span className="text-xs text-stone-400 font-normal ml-2">
+        ({count} characters{suggested && ` / limit < ${suggested}`})
+      </span>
+    );
+  } else {
+    return (
+      <span className="text-xs text-stone-400 font-normal ml-2">
+        ({count} 字{suggested && ` / 建議 < ${suggested} 字`})
+      </span>
+    );
+  }
+};
+
 interface DreamFormProps {
   onSubmit: (data: DreamInput) => void;
   isSubmitting: boolean;
@@ -120,7 +139,10 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">{t("form_content_label")}</label>
+            <label className="text-sm font-medium text-stone-700">
+              {t("form_content_label")}
+              <WordCount text={formValues.dreamContent} suggested="500" />
+            </label>
           <Textarea 
             {...register("dreamContent")} 
             placeholder={t("form_content_placeholder")} 
@@ -131,12 +153,18 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700">{t("form_wake_emotion_label")}</label>
+            <label className="text-sm font-medium text-stone-700">
+              {t("form_wake_emotion_label")}
+              <WordCount text={formValues.wakingEmotion} suggested="30" />
+            </label>
             <Input {...register("wakingEmotion")} list="emotions-list" placeholder={t("form_wake_emotion_placeholder")} />
             {errors.wakingEmotion && <p className="text-xs text-red-500">{errors.wakingEmotion.message}</p>}
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700">{t("form_dream_emotion_label")}</label>
+            <label className="text-sm font-medium text-stone-700">
+              {t("form_dream_emotion_label")}
+              <WordCount text={formValues.dreamEmotion} suggested="30" />
+            </label>
             <Input {...register("dreamEmotion")} list="emotions-list" placeholder={t("form_dream_emotion_placeholder")} />
             {errors.dreamEmotion && <p className="text-xs text-red-500">{errors.dreamEmotion.message}</p>}
           </div>
@@ -157,21 +185,33 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700">{t("form_person_label")}</label>
+            <label className="text-sm font-medium text-stone-700">
+              {t("form_person_label")}
+              <WordCount text={formValues.keyCharacters} suggested="30" />
+            </label>
             <Input {...register("keyCharacters")} placeholder={t("form_person_placeholder")} />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700">{t("form_scene_label")}</label>
+            <label className="text-sm font-medium text-stone-700">
+              {t("form_scene_label")}
+              <WordCount text={formValues.keyScenes} suggested="30" />
+            </label>
             <Input {...register("keyScenes")} placeholder={t("form_scene_placeholder")} />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700">{t("form_object_label")}</label>
+            <label className="text-sm font-medium text-stone-700">
+              {t("form_object_label")}
+              <WordCount text={formValues.keySymbols} suggested="30" />
+            </label>
             <Input {...register("keySymbols")} placeholder={t("form_object_placeholder")} />
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">{t("form_association_label")}</label>
+          <label className="text-sm font-medium text-stone-700">
+            {t("form_association_label")}
+            <WordCount text={formValues.personalAssociations} suggested="200" />
+          </label>
           <Textarea 
             {...register("personalAssociations")} 
             placeholder={t("form_association_placeholder")} 
@@ -188,7 +228,10 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
         </div>
         
         <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">{t("form_stress_label")}</label>
+          <label className="text-sm font-medium text-stone-700">
+            {t("form_stress_label")}
+            <WordCount text={formValues.recentLifeEvents} suggested="200" />
+          </label>
           <Textarea 
             {...register("recentLifeEvents")} 
             placeholder={t("form_stress_placeholder")} 
@@ -196,7 +239,10 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
         </div>
         
         <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">{t("form_note_label")}</label>
+          <label className="text-sm font-medium text-stone-700">
+            {t("form_note_label")}
+            <WordCount text={formValues.additionalNotes} suggested="100" />
+          </label>
           <Input {...register("additionalNotes")} placeholder={t("form_note_placeholder")} />
         </div>
       </div>
