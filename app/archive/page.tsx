@@ -73,14 +73,36 @@ export default function ArchivePage() {
         headers,
         body: JSON.stringify(payload),
       });
-      const result = await res.json();
+
+      if (res.status === 413) {
+         alert(lang === "en" ? "Input too large. Please shorten your dream content before comparing." : "輸入字數過多，伺服器無法處理，請縮減比較內容。");
+         return;
+      }
+
+      if (res.status === 504) {
+         alert(lang === "en" ? "Server timeout. The comparison took too long." : "伺服器超時，比較過程花費了太長時間，請稍後再試。");
+         return;
+      }
+
+      let result;
+      try {
+        result = await res.json();
+      } catch (parseError) {
+        throw new Error("Invalid response from server: " + res.status);
+      }
+
+      if (res.status === 400 && result.error === "Invalid prompt content detected.") {
+         alert(lang === "en" ? "Invalid characters or restricted keywords detected." : "檢測到無效字元或嘗試繞過系統的指令，拒絕請求。");
+         return;
+      }
+
       if (result.type === "SUCCESS") {
          setCompareReport(result.report);
       } else {
          alert(lang === "en" ? "Comparison failed, please try again." : "比較失敗，請稍後再試。");
       }
     } catch (error) {
-      alert(lang === "en" ? "Network connection failed." : "網路連線失敗。");
+      alert(lang === "en" ? "Network connection failed or input data is too large." : "網路連線失敗，或輸入資料超出上限。");
     } finally {
       setIsComparing(false);
     }

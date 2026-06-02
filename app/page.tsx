@@ -32,12 +32,23 @@ export default function Home() {
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
-
       if (response.status === 413) {
-         alert(lang === "en" ? "Input too large." : "輸入字數過多，請縮減內容。");
+         alert(lang === "en" ? "Input too large. Please shorten your dream content." : "輸入字數過多，伺服器無法處理，請縮減內容標籤或細節。");
          setAppState("FORM");
          return;
+      }
+
+      if (response.status === 504) {
+         alert(lang === "en" ? "Server timeout. The analysis took too long." : "伺服器超時，分析花費了太長時間，請稍後再試。");
+         setAppState("FORM");
+         return;
+      }
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        throw new Error("Invalid response from server: " + response.status);
       }
 
       if (response.status === 400 && result.error === "Invalid prompt content detected.") {
@@ -61,7 +72,7 @@ export default function Home() {
       }
     } catch (e) {
       console.error(e);
-      alert(lang === "en" ? "Connection failed. Please check your network." : "連線失敗，請檢查網路狀態。");
+      alert(lang === "en" ? "Connection failed. Please check your network or ensure your input is not excessively long." : "連線失敗，請檢查網路狀態，或是您的輸入內容可能超出伺服器可接受的上限。");
       setAppState("FORM");
     }
   };
