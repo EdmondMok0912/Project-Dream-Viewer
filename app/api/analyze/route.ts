@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     const primaryModel = process.env.PRIMARY_MODEL || "gemma-4-31b-it";
     const fallbackModel = process.env.FALLBACK_MODEL || "gemma-4-26b-a4b-it";
 
-    async function callOpenRouterFallback(systemInstruction: string, userContent: string): Promise<string> {
+    async function callOpenRouter(systemInstruction: string, userContent: string, responseFormat?: string): Promise<string> {
       const openRouterApiKey = process.env.OPENROUTER_API_KEY;
       if (!openRouterApiKey) throw new Error("OPENROUTER_API_KEY is missing");
 
@@ -59,19 +59,23 @@ export async function POST(req: NextRequest) {
       for (const model of orModels) {
         try {
           console.log(`Trying OpenRouter model: ${model}`);
+          const body: any = {
+            model: model,
+            messages: [
+              { role: "system", content: systemInstruction },
+              { role: "user", content: userContent }
+            ]
+          };
+          if (responseFormat === "application/json") {
+             body.response_format = { type: "json_object" };
+          }
           const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${openRouterApiKey}`,
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-              model: model,
-              messages: [
-                { role: "system", content: systemInstruction },
-                { role: "user", content: userContent }
-              ]
-            })
+            body: JSON.stringify(body)
           });
 
           if (!res.ok) {
@@ -89,28 +93,29 @@ export async function POST(req: NextRequest) {
           lastError = e;
         }
       }
-      throw lastError || new Error("All OpenRouter fallbacks failed");
+      throw lastError || new Error("All OpenRouter models failed");
     }
 
     async function generateWithFallback(contents: string, config: any) {
+      if (process.env.OPENROUTER_API_KEY) {
+        try {
+          console.log("Trying OpenRouter as primary API...");
+          const resultText = await callOpenRouter(config.systemInstruction || "", contents, config.responseMimeType);
+          return { text: resultText };
+        } catch (openRouterError) {
+          console.warn("OpenRouter failed, falling back to Google AI Studio...", openRouterError);
+        }
+      } else {
+        console.warn("OPENROUTER_API_KEY is not set. Proceeding directly to Google AI Studio fallback.");
+      }
+
+      console.log(`Using Google AI Studio API with model ${primaryModel}`);
       try {
         return await ai.models.generateContent({ model: primaryModel, contents, config });
       } catch (error: any) {
         console.warn(`Primary model ${primaryModel} failed`, error?.message || error);
         
-        const isRateLimitedOrTimeout = error?.status === 429 || error?.status === 503 || error?.status === 504 || error?.status === "UNAVAILABLE" || error?.name === "TimeoutError" || (error?.message && (error.message.includes("503") || error.message.includes("504") || error.message.includes("timeout")));
-
-        if (isRateLimitedOrTimeout && process.env.OPENROUTER_API_KEY) {
-          console.log("Rate limited / Timeout from Gemini, falling back to OpenRouter...");
-          try {
-            const resultText = await callOpenRouterFallback(config.systemInstruction || "", contents);
-            return { text: resultText };
-          } catch (openRouterError) {
-            console.error("OpenRouter fallback also failed", openRouterError);
-          }
-        }
-
-        console.log(`Falling back to secondary Gemini model ${fallbackModel}`);
+        console.log(`Falling back to secondary model ${fallbackModel}`);
         return await ai.models.generateContent({ model: fallbackModel, contents, config });
       }
     }
