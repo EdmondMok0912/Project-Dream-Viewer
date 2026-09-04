@@ -16,14 +16,14 @@
 ## i18n Rules (strict)
 
 - Every user-visible string comes from `const { t } = useI18n()` with a key defined in `components/i18n-provider.tsx` for **both** `zh` and `en`.
-- Forbidden: inline bilingual ternaries (`lang === "en" ? "..." : "..."`) in components. They bypass the translation table and drift — `app/page.tsx`, `components/report-view.tsx` and `components/header.tsx` still have them (known debt; don't add more, migrate when touched).
+- Forbidden: inline bilingual ternaries (`lang === "en" ? "..." : "..."`) producing user-facing strings. They bypass the translation table and drift. The only allowed form is a className-only styling toggle (e.g. the header lang switch). All known violations were migrated in task `09-05-p2-ux`.
 - New language? Extend `type Language` + `translations` in `i18n-provider.tsx` and the `x-app-lang` mapping in API routes (`lib/prompts.ts` currently branches only `"en"` vs Traditional Chinese).
-- Error/status messaging in `app/page.tsx` uses `alert()` — acceptable short-term, but new flows should prefer inline UI states over `alert()`/`window.confirm`.
+- Error/status messaging uses inline UI states — error banners with `role="alert"` (see `app/page.tsx` `errorKey` / `app/archive/page.tsx` `noticeKey`), transient `aria-live="polite"` notices, and two-step confirm buttons for destructive actions (see `dream-form.tsx` clear-draft). No `alert()`/`window.confirm` anywhere.
 
 ## Motion
 
 - Orchestrated entrance animations use `motion/react` with a shared `containerVariants`/`itemVariants` stagger pattern (`components/report-view.tsx` is the reference).
-- Modals: `AnimatePresence` + backdrop click to close (`components/tutorial-modal.tsx`). Note gap: no Escape handling / focus trap yet — add them when touching modals.
+- Modals: `AnimatePresence` + backdrop click to close. `components/tutorial-modal.tsx` is the accessibility reference: `role="dialog"` + `aria-modal` + `aria-labelledby`, Escape-to-close, simple Tab focus trap, focus moved in on open and restored to the trigger on close (migrated in task `09-05-p2-ux`). Copy this pattern for any new modal.
 
 ## Accessibility minimums
 

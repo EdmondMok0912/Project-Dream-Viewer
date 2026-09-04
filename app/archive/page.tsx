@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { ExportedDream, CompareReport, compareReportSchema, exportedDreamSchema } from "@/lib/schemas";
 import { UploadCloud, Activity, Trash2 } from "lucide-react";
 import { Header } from "@/components/header";
-import { useI18n } from "@/components/i18n-provider";
+import { useI18n, TranslationKey } from "@/components/i18n-provider";
 
 export default function ArchivePage() {
   const { lang, t } = useI18n();
   const [dreams, setDreams] = useState<ExportedDream[]>([]);
   const [compareReport, setCompareReport] = useState<CompareReport | null>(null);
   const [isComparing, setIsComparing] = useState(false);
+  const [noticeKey, setNoticeKey] = useState<TranslationKey | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,15 +26,16 @@ export default function ArchivePage() {
         try {
           json = JSON.parse(event.target?.result as string);
         } catch {
-          alert(t("archive_invalid_file"));
+          setNoticeKey("archive_invalid_file");
           return;
         }
         const parseResult = exportedDreamSchema.safeParse(json);
         if (!parseResult.success) {
-          alert(t("archive_invalid_file"));
+          setNoticeKey("archive_invalid_file");
           return;
         }
         const dream = parseResult.data;
+        setNoticeKey(null);
         setDreams(prev => {
           // Avoid duplicates by timestamp
           if (prev.some(d => d.timestamp === dream.timestamp)) return prev;
@@ -57,6 +59,7 @@ export default function ArchivePage() {
     if (dreams.length < 2) return;
 
     setIsComparing(true);
+    setNoticeKey(null);
     try {
       const payload = dreams.map(d => ({
          date: d.input.date,
@@ -79,17 +82,17 @@ export default function ArchivePage() {
       });
 
       if (res.status === 413) {
-         alert(t("archive_too_large"));
+         setNoticeKey("error_too_large");
          return;
       }
 
       if (res.status === 504) {
-         alert(t("archive_timeout"));
+         setNoticeKey("error_timeout_compare");
          return;
       }
 
       if (res.status === 503) {
-         alert(t("archive_service_busy"));
+         setNoticeKey("error_service_busy");
          return;
       }
 
@@ -101,22 +104,22 @@ export default function ArchivePage() {
       }
 
       if (res.status === 400 && result.error === "Invalid prompt content detected.") {
-         alert(t("archive_blocked"));
+         setNoticeKey("error_blocked");
          return;
       }
 
       if (result.type === "SUCCESS") {
          const reportResult = compareReportSchema.safeParse(result.report);
          if (!reportResult.success) {
-            alert(t("archive_compare_failed"));
+            setNoticeKey("error_compare_failed");
             return;
          }
          setCompareReport(reportResult.data);
       } else {
-         alert(t("archive_compare_failed"));
+         setNoticeKey("error_compare_failed");
       }
     } catch (error) {
-      alert(t("archive_network_error"));
+      setNoticeKey("error_network");
     } finally {
       setIsComparing(false);
     }
@@ -131,6 +134,12 @@ export default function ArchivePage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 animate-in fade-in fill-mode-both duration-500">
+
+         {noticeKey && (
+            <div role="alert" className="mb-8 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+               {t(noticeKey)}
+            </div>
+         )}
 
          <div className="bg-white p-8 rounded-xl border border-stone-200 shadow-sm text-center">
             <input

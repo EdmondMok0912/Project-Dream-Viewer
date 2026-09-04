@@ -6,7 +6,7 @@ import { ReportView } from "@/components/report-view";
 import { CrisisStop } from "@/components/crisis-stop";
 import { DreamInput, AnalysisReport } from "@/lib/schemas";
 import { Header } from "@/components/header";
-import { useI18n } from "@/components/i18n-provider";
+import { useI18n, TranslationKey } from "@/components/i18n-provider";
 
 type AppState = "FORM" | "LOADING" | "REPORT" | "CRISIS";
 
@@ -15,13 +15,15 @@ export default function Home() {
   const [appState, setAppState] = useState<AppState>("FORM");
   const [inputData, setInputData] = useState<DreamInput | null>(null);
   const [reportData, setReportData] = useState<AnalysisReport | null>(null);
+  const [errorKey, setErrorKey] = useState<TranslationKey | null>(null);
 
   const handleSubmit = async (data: DreamInput) => {
     setAppState("LOADING");
     setInputData(data);
-    
+    setErrorKey(null);
+
     try {
-      const headers: Record<string, string> = { 
+      const headers: Record<string, string> = {
         "Content-Type": "application/json",
         "x-app-lang": lang
       };
@@ -33,19 +35,19 @@ export default function Home() {
       });
 
       if (response.status === 413) {
-         alert(lang === "en" ? "Input too large. Please shorten your dream content." : "輸入字數過多，伺服器無法處理，請縮減內容標籤或細節。");
+         setErrorKey("error_too_large");
          setAppState("FORM");
          return;
       }
 
       if (response.status === 504) {
-         alert(lang === "en" ? "Server timeout (504). The analysis took too long. Please try shortening your content, or try again later." : "伺服器超時 (504)，分析花費了太長時間。由於伺服器有處理時間限制，請嘗試精簡您的夢境內容與細節後再試一次。");
+         setErrorKey("error_timeout");
          setAppState("FORM");
          return;
       }
 
       if (response.status === 503) {
-         alert(lang === "en" ? "The AI service is currently experiencing high demand. Please try again later." : "AI 服務器目前正處於高負載狀態，請稍後再試。");
+         setErrorKey("error_service_busy");
          setAppState("FORM");
          return;
       }
@@ -58,7 +60,7 @@ export default function Home() {
       }
 
       if (response.status === 400 && result.error === "Invalid prompt content detected.") {
-         alert(lang === "en" ? "Invalid characters or restricted keywords detected." : "檢測到無效字元或嘗試繞過系統的指令，拒絕請求。");
+         setErrorKey("error_blocked");
          setAppState("FORM");
          return;
       }
@@ -73,12 +75,12 @@ export default function Home() {
          setAppState("REPORT");
       } else {
          console.error(result);
-         alert(lang === "en" ? "An error occurred during analysis. Please try again." : "分析過程中發生錯誤，請稍後再試。");
+         setErrorKey("error_generic");
          setAppState("FORM");
       }
     } catch (e) {
       console.error(e);
-      alert(lang === "en" ? "Connection failed. Please check your network or ensure your input is not excessively long." : "連線失敗，請檢查網路狀態，或是您的輸入內容可能超出伺服器可接受的上限。");
+      setErrorKey("error_network");
       setAppState("FORM");
     }
   };
@@ -87,6 +89,7 @@ export default function Home() {
     setAppState("FORM");
     setInputData(null);
     setReportData(null);
+    setErrorKey(null);
   };
 
   return (
@@ -98,9 +101,14 @@ export default function Home() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4">
-        
+
         <div style={{ display: (appState === "FORM" || appState === "LOADING") ? "block" : "none" }}>
           <div className={`space-y-8 animate-in fade-in fill-mode-both duration-500 ${appState === "LOADING" ? "pointer-events-none opacity-60 grayscale-[30%]" : ""}`}>
+            {appState === "FORM" && errorKey && (
+              <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                {t(errorKey)}
+              </div>
+            )}
             <div className="max-w-2xl">
               <h1 className="text-3xl font-semibold tracking-tight text-stone-900 mb-3">{t("title")}</h1>
               <p className="text-base text-stone-500 leading-relaxed mb-6">

@@ -6,12 +6,11 @@
 
 ## Existing Custom Hooks
 
-- `useI18n()` (`components/i18n-provider.tsx`) — throws outside `I18nProvider`; returns `{ lang, setLang, t }`. This is the only hook components should reach for globally.
-- `useIsMobile()` (`hooks/use-mobile.ts`) — matchMedia-based, currently **unused anywhere**. Either delete it or adopt it; don't leave it drifting.
+- `useI18n()` (`components/i18n-provider.tsx`) — throws outside `I18nProvider`; returns `{ lang, setLang, t }`. This is the only hook components should reach for globally. (`hooks/use-mobile.ts` `useIsMobile` was deleted in task `09-05-p2-ux` — it had no consumers; recreate it if a mobile branch is ever needed.)
 
 ## Rules for New Custom Hooks
 
-- File name = hook name in kebab-case, one hook per file under `hooks/` (`hooks/use-mobile.ts` is the pattern).
+- File name = hook name in kebab-case, one hook per file under `hooks/`.
 - Prefix with `use`; return a stable object shape; guard `window` usage inside `useEffect` (SSR-safe) — never read browser APIs during render.
 - Prefer `matchMedia` listeners with cleanup over resize listeners.
 

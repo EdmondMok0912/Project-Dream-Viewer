@@ -63,6 +63,10 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
 
   const formValues = watch();
 
+  const [draftNotice, setDraftNotice] = React.useState<"saved" | "cleared" | null>(null);
+  const [confirmingClear, setConfirmingClear] = React.useState(false);
+  const confirmTimerRef = React.useRef<number | null>(null);
+
   React.useEffect(() => {
     const draft = localStorage.getItem(DRAFT_KEY);
     if (draft) {
@@ -83,29 +87,41 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
   }, [formValues]);
 
   const handleClearDraft = () => {
-    if (window.confirm("Are you sure you want to clear the draft? / 確定要清空草稿嗎？")) {
-      localStorage.removeItem(DRAFT_KEY);
-      reset({
-        date: new Date().toISOString().split("T")[0],
-        title: "",
-        dreamContent: "",
-        wakingEmotion: "",
-        dreamEmotion: "",
-        keyCharacters: "",
-        keyScenes: "",
-        keySymbols: "",
-        personalAssociations: "",
-        recentLifeEvents: "",
-        additionalNotes: "",
-      });
+    if (!confirmingClear) {
+      setConfirmingClear(true);
+      if (confirmTimerRef.current) window.clearTimeout(confirmTimerRef.current);
+      confirmTimerRef.current = window.setTimeout(() => setConfirmingClear(false), 3000);
+      return;
     }
+    if (confirmTimerRef.current) window.clearTimeout(confirmTimerRef.current);
+    setConfirmingClear(false);
+    localStorage.removeItem(DRAFT_KEY);
+    reset({
+      date: new Date().toISOString().split("T")[0],
+      title: "",
+      dreamContent: "",
+      wakingEmotion: "",
+      dreamEmotion: "",
+      keyCharacters: "",
+      keyScenes: "",
+      keySymbols: "",
+      personalAssociations: "",
+      recentLifeEvents: "",
+      additionalNotes: "",
+    });
+    setDraftNotice("cleared");
   };
 
   const handleManualSave = () => {
     const values = watch();
     localStorage.setItem(DRAFT_KEY, JSON.stringify(values));
-    alert(t("form_draft_saved"));
+    setDraftNotice("saved");
   };
+
+  // Clear the pending two-step-confirm revert timer on unmount.
+  React.useEffect(() => () => {
+    if (confirmTimerRef.current) window.clearTimeout(confirmTimerRef.current);
+  }, []);
 
   const emotions = [
     t("emo_joy"),
@@ -274,22 +290,25 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
 
       <div className="flex flex-col sm:flex-row justify-between items-center pt-4 gap-4">
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={handleManualSave}
             className="flex-1 sm:flex-none text-stone-600"
           >
             {t("form_draft_save")}
           </Button>
-          <Button 
-            type="button" 
-            variant="ghost" 
+          <Button
+            type="button"
+            variant="ghost"
             onClick={handleClearDraft}
-            className="text-stone-500 hover:text-red-500 hover:bg-red-50 transition-colors"
+            className={`transition-colors ${confirmingClear ? "text-red-600 bg-red-50" : "text-stone-500 hover:text-red-500 hover:bg-red-50"}`}
           >
-            {t("form_draft_clear")}
+            {confirmingClear ? t("form_draft_confirm") : t("form_draft_clear")}
           </Button>
+          <span aria-live="polite" className="text-xs text-stone-500">
+            {draftNotice === "saved" ? t("form_draft_saved") : draftNotice === "cleared" ? t("form_draft_cleared") : ""}
+          </span>
         </div>
         <Button type="submit" disabled={isSubmitting} size="lg" className="w-full sm:w-auto">
           {isSubmitting ? t("form_submitting") : t("form_submit")}

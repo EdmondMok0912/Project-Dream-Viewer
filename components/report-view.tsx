@@ -34,7 +34,7 @@ const itemVariants = {
 };
 
 export function ReportView({ report, input, onReset }: ReportViewProps) {
-  const { lang, t } = useI18n();
+  const { t } = useI18n();
   const handleDownloadJSON = () => {
     const data = {
       version: "1.0",
@@ -56,14 +56,14 @@ export function ReportView({ report, input, onReset }: ReportViewProps) {
 # ${t("report_title")} ${input.title}
 **Date:** ${input.date}
 
-## ${lang === "en" ? "Summary" : "夢境摘要"}
+## ${t("md_summary")}
 - **${t("report_theme")}：** ${report.summary.theme}
 - **${t("report_core_emotion")}：** ${report.summary.coreEmotion}
 - **${t("report_symbols")}：** ${report.summary.mainSymbols.join(", ")}
 
 ${report.summary.briefSummary}
 
-## ${lang === "en" ? "Jungian Perspective" : "榮格取向深度分析"}
+## ${t("md_jungian")}
 ${report.detailedAnalysis.jungianPerspective}
 
 ### ${t("report_psychodynamic")}
@@ -75,7 +75,7 @@ ${report.detailedAnalysis.realLifeConnection}
 ### ${t("report_reflection")}
 ${report.detailedAnalysis.weeklyReflectionQuestions.map((q) => `- ${q}`).join("\n")}
 
-## ${lang === "en" ? "Alternative Perspectives Appendix" : "其他可能視角附錄"}
+## ${t("md_appendix")}
 - **${t("report_freud")}：** ${report.alternativePerspectives?.freudianView || "-"}
 - **${t("report_cognitive")}：** ${report.alternativePerspectives?.modernPsychology || "-"}
 - **${t("report_stress")}：** ${report.alternativePerspectives?.physiologicalOrStressFactors || "-"}
@@ -105,10 +105,10 @@ ${report.detailedAnalysis.weeklyReflectionQuestions.map((q) => `- ${q}`).join("\
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleDownloadJSON}>
-            <Download className="mr-2 h-4 w-4" /> JSON
+            <Download className="mr-2 h-4 w-4" /> {t("report_download_json")}
           </Button>
           <Button variant="outline" size="sm" onClick={handleDownloadMD}>
-            <Download className="mr-2 h-4 w-4" /> Markdown
+            <Download className="mr-2 h-4 w-4" /> {t("report_download_md")}
           </Button>
           <Button variant="secondary" size="sm" onClick={onReset}>
             <RefreshCw className="mr-2 h-4 w-4" /> {t("report_new")}

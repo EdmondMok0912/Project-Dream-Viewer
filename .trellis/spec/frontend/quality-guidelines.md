@@ -19,23 +19,21 @@ Notes:
 
 ## Forbidden Patterns
 
-- Inline bilingual ternaries in components — use `t()` keys (see component-guidelines).
+- Inline bilingual ternaries in components — use `t()` keys (see component-guidelines). Exception: className-only styling toggles (e.g. the header lang switch).
 - `any` / `@ts-ignore` on data boundaries (see type-safety).
 - `console.log` left in client components; server route logging is fine (`console.error`/`warn` in `app/api/*` is intentional).
-- New `alert()`/`window.confirm` flows — prefer inline UI states; migrate existing ones only when the file is being touched anyway.
-- Never log or return raw API keys / full `error` objects to clients (`app/api/*/route.ts` currently returns `details: error` on 500 — flagged as security debt, do not replicate).
+- `alert()`/`window.confirm` — none exist; errors render as inline banners with `role="alert"`, transient confirmations use `aria-live="polite"` text, destructive actions use two-step confirm buttons (see `dream-form.tsx`).
+- Never log or return raw API keys / full `error` objects to clients.
 
 ## Known Debt Registry (fix, don't replicate)
 
 | Debt | Location | Why it matters |
 |---|---|---|
 | Gemma `responseMimeType` unverified at runtime | `lib/ai-client.ts` Gemini path | If Gemma rejects JSON mime type the request 500s; smoke-test with a real key |
-| Dead code | `hooks/use-mobile.ts` unused; unused i18n keys (`report_download_*`, `archive_overall_title`, `archive_suggestion_title`, `form_draft_cleared`) | Cleanup candidates |
-| i18n drift | `<html lang="en">` vs default zh | Follow i18n rules when touching |
-| `<html lang>` not synced with i18n | `app/layout.tsx` | a11y |
 
 Fixed 2026-09-05 (task `09-05-p0-correctness`): AI output Zod validation, route helper duplication (now `lib/ai-client.ts`), Gemma `systemInstruction` (folded into contents), OpenRouter timeout, `details: error` leak.
 Fixed 2026-09-05 (task `09-05-p1-quality-refactor`): Tailwind typography + tw-animate-css loaded (`prose`/`animate-in` now generate real CSS), `sanitizeInput` redesigned to injection-phrase patterns (benign "instruction"/"bypass" no longer blocked), archive upload validated with `exportedDreamSchema`, i18n drift fixed (archive themes heading on `t()`, `crisis-stop.tsx` on `crisis_*` keys, zh typo, typed `t()` without `@ts-ignore`).
+Fixed 2026-09-05 (task `09-05-p2-ux`): all `alert()`/`window.confirm` replaced by inline UI states (error banners, `aria-live` draft notice, two-step clear confirm), tutorial modal a11y (dialog role/aria, Esc, focus trap + restore), `<html lang>` synced with UI language, Markdown-export headings + report download buttons on `t()` keys, dead code removed (`hooks/use-mobile.ts`, legacy `.eslintrc.json`, orphaned i18n keys).
 
 ## Discipline
 
