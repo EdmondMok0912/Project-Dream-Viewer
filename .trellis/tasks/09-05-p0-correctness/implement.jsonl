@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/backend/ai-api-guidelines.md", "reason": "Route architecture, model chain, error mapping contract, hard rules for changing AI routes"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Zod single-source-of-truth and validation rules by data source"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Gates (tsc/lint/build), forbidden patterns, known debt registry"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "R5 extracts duplicated helpers into lib/ai-client.ts"}
