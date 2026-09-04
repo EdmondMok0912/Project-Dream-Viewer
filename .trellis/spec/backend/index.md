@@ -10,6 +10,6 @@ This is a single Next.js app (no separate backend package). "Backend" here means
 
 | Guide | Description |
 |-------|-------------|
-| [AI API Guidelines](./ai-api-guidelines.md) | Route structure, model fallback chain, prompt/schema contracts, error mapping |
+| [AI API Guidelines](./ai-api-guidelines.md) | Route structure, model fallback chain, prompt/schema contracts, error mapping, contract tests (`tests/api/`) |
 
 Frontend conventions: [`../frontend/index.md`](../frontend/index.md).
