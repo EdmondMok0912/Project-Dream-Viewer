@@ -16,7 +16,7 @@
 ## i18n Rules (strict)
 
 - Every user-visible string comes from `const { t } = useI18n()` with a key defined in `components/i18n-provider.tsx` for **both** `zh` and `en`.
-- Forbidden: inline bilingual ternaries (`lang === "en" ? "..." : "..."`) in components. They bypass the translation table and drift — `crisis-stop.tsx` and several `alert()` calls still do this (known debt; don't add more, migrate when touched).
+- Forbidden: inline bilingual ternaries (`lang === "en" ? "..." : "..."`) in components. They bypass the translation table and drift — `app/page.tsx`, `components/report-view.tsx` and `components/header.tsx` still have them (known debt; don't add more, migrate when touched).
 - New language? Extend `type Language` + `translations` in `i18n-provider.tsx` and the `x-app-lang` mapping in API routes (`lib/prompts.ts` currently branches only `"en"` vs Traditional Chinese).
 - Error/status messaging in `app/page.tsx` uses `alert()` — acceptable short-term, but new flows should prefer inline UI states over `alert()`/`window.confirm`.
 

@@ -6,15 +6,25 @@ const OPENROUTER_DEFAULT_TIMEOUT_MS = 30_000;
 const GEMINI_PRIMARY_MODEL_DEFAULT = "gemma-4-31b-it";
 const GEMINI_FALLBACK_MODEL_DEFAULT = "gemma-4-26b-a4b-it";
 
-const PROMPT_INJECTION_KEYWORDS = [
-  "ignore previous", "ignore all", "system prompt",
-  "instruction", "bypass", "jailbreak", "forget everything",
-  "ignore above", "you are now"
+// Defense-in-depth screen against explicit prompt-injection attempts before
+// the input reaches the model. Precision-first: patterns match
+// instruction-shaped phrases, not single generic words — "instruction" and
+// "bypass" appear in benign dreams (e.g. a teacher's instructions). Content
+// safety itself is the risk-classification phase's job, so missing a novel
+// phrasing here is acceptable; blocking a legitimate dream is not.
+const PROMPT_INJECTION_PATTERNS: RegExp[] = [
+  /ignore\s+(all\s+)?(previous|prior|earlier|above)/i,
+  /ignore\s+(all|any|your)\s+(instructions?|prompts?|rules?)/i,
+  /disregard\s+(all\s+)?(previous|prior|earlier|above|your)/i,
+  /forget\s+(everything|all\s+your|your\s+(instructions|training|prompt))/i,
+  /\bsystem\s+prompts?\b/i,
+  /reveal\s+(your|the)\s+(system|initial|hidden|original)\s+(prompts?|instructions?)/i,
+  /bypass\s+(all\s+)?(your\s+)?(rules?|restrictions?|filters?|safety|guardrails?|content\s+polic)/i,
+  /jailbreak\s+(the\s+|this\s+|your\s+)?(ai|bot|model|chatbot|system|assistant)/i,
 ];
 
 export function sanitizeInput(text: string): boolean {
-  const lower = text.toLowerCase();
-  return !PROMPT_INJECTION_KEYWORDS.some(keyword => lower.includes(keyword));
+  return !PROMPT_INJECTION_PATTERNS.some((pattern) => pattern.test(text));
 }
 
 interface JsonGenerationRequest {

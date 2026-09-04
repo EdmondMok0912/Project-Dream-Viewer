@@ -64,9 +64,13 @@ export const compareReportSchema = z.object({
 
 export type CompareReport = z.infer<typeof compareReportSchema>;
 
-export type ExportedDream = {
-  version: "1.0";
-  timestamp: string;
-  input: DreamInput;
-  report: AnalysisReport;
-}
+// Matches the payload written by handleDownloadJSON in components/report-view.tsx.
+// Bumping the exporter's version string requires updating z.literal here in the same change.
+export const exportedDreamSchema = z.object({
+  version: z.literal("1.0"),
+  timestamp: z.string(),
+  input: dreamInputSchema,
+  report: reportSchema,
+});
+
+export type ExportedDream = z.infer<typeof exportedDreamSchema>;

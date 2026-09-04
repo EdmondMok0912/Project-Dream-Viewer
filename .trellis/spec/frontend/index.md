@@ -22,10 +22,10 @@ Backend (AI API routes) conventions live in [`../backend/`](../backend/index.md)
 ## Stack Facts (do not re-derive)
 
 - **Next.js 15 App Router + React 19**, TypeScript `strict` (`tsconfig.json`). Types are checked in CI-equivalent builds; `next.config.ts` sets `eslint.ignoreDuringBuilds: true`, so lint must be run manually.
-- **Tailwind CSS v4** via `@tailwindcss/postcss`. v4 loads plugins *in CSS*: current `app/globals.css` contains only `@import "tailwindcss";` — `@tailwindcss/typography` and `tw-animate-css` are installed but **not yet loaded**, so `prose*` and `animate-in` classes are silent no-ops (known debt, see quality-guidelines).
+- **Tailwind CSS v4** via `@tailwindcss/postcss`. v4 loads plugins *in CSS*: `app/globals.css` loads `@tailwindcss/typography` (`@plugin`) and `tw-animate-css` (`@import`), so `prose*` report styling and `animate-in` entrance utilities generate real CSS.
 - **Design system**: stone/orange palette. Primitives in `components/ui/` (shadcn-style with `cva`). Layout rhythm: `max-w-5xl mx-auto px-4`, cards as `rounded-xl border border-stone-200 bg-white p-6 shadow-sm`.
-- **Animation**: `motion/react` (Framer Motion v12) for orchestrated UI (see `components/report-view.tsx`, `components/tutorial-modal.tsx`); CSS `animate-in` classes appear but are currently non-functional.
-- **i18n**: homegrown provider in `components/i18n-provider.tsx` (`useI18n()` → `{ lang, setLang, t }`). No i18n library. All UI strings must come from `t()`; `lang` is also sent to the API via the `x-app-lang` header.
+- **Animation**: `motion/react` (Framer Motion v12) for orchestrated UI (see `components/report-view.tsx`, `components/tutorial-modal.tsx`); plain CSS `animate-in` entrance utilities (tw-animate-css) on simpler elements.
+- **i18n**: homegrown provider in `components/i18n-provider.tsx` (`useI18n()` → `{ lang, setLang, t }`). No i18n library. All UI strings must come from `t()` (typed key union — missing keys or zh/en parity gaps are compile errors); `lang` is also sent to the API via the `x-app-lang` header.
 
 ---
 

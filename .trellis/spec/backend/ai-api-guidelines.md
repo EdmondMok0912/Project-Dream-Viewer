@@ -13,7 +13,7 @@
 
 All provider plumbing lives here and is imported by both routes:
 
-- `sanitizeInput(text)` — prompt-injection keyword screen returning boolean. Naive by design (has false positives, e.g. "instruction" in a legitimate dream); redesign if it must change, do not accrete keywords.
+- `sanitizeInput(text)` — prompt-injection screen returning boolean. Matches injection-shaped **phrase patterns** (multi-word, anchored — e.g. "ignore all previous…", "system prompt", "bypass safety filters"), precision-first so benign words like "instruction" or "bypass" pass; the LLM risk-classification phase is the content-safety layer. If it must change, redesign the pattern list — do not accrete keywords or bare words.
 - `generateJsonWithFallback({ systemInstruction, contents })` → `Promise<string>`. Call chain:
   1. If `OPENROUTER_API_KEY` is set → OpenRouter phase (`google/gemma-4-31b-it:free` → `google/gemma-4-26b-a4b-it:free`, OpenAI-compatible, `response_format: { type: "json_object" }`). This is a **cost-control primary, not a failure fallback** — the whole phase shares one time budget (`OPENROUTER_TIMEOUT_MS`, default 30 s) enforced with `AbortSignal.timeout`; a hung provider cannot consume the 60 s `maxDuration`.
   2. Gemini API via `@google/genai`: `PRIMARY_MODEL` (default `gemma-4-31b-it`) → on failure `FALLBACK_MODEL` (default `gemma-4-26b-a4b-it`), with `responseMimeType: "application/json"`.

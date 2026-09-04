@@ -29,14 +29,13 @@ Notes:
 
 | Debt | Location | Why it matters |
 |---|---|---|
-| `prose` / `animate-in` classes are no-ops | `app/globals.css` missing `@plugin "@tailwindcss/typography"` and `@import "tw-animate-css";` | Report styling + all CSS entrance animations silently do nothing |
 | Gemma `responseMimeType` unverified at runtime | `lib/ai-client.ts` Gemini path | If Gemma rejects JSON mime type the request 500s; smoke-test with a real key |
-| Prompt-injection blacklist false positives | `sanitizeInput` in `lib/ai-client.ts` blocks benign words like "instruction" | Naive approach; needs redesign, not keyword accretion |
-| Dead code | `hooks/use-mobile.ts` unused; unused i18n keys (`crisis_*`, `report_download_*`, `archive_overall_title`, `archive_suggestion_title`, `form_draft_cleared`) | Cleanup candidates |
-| i18n drift | hardcoded heading 反覆出現的主題 in `app/archive/page.tsx`; zh typo 並未未來的比較 in `tutorial_step2_desc`; `<html lang="en">` vs default zh | Follow i18n rules when touching |
+| Dead code | `hooks/use-mobile.ts` unused; unused i18n keys (`report_download_*`, `archive_overall_title`, `archive_suggestion_title`, `form_draft_cleared`) | Cleanup candidates |
+| i18n drift | `<html lang="en">` vs default zh | Follow i18n rules when touching |
 | `<html lang>` not synced with i18n | `app/layout.tsx` | a11y |
 
 Fixed 2026-09-05 (task `09-05-p0-correctness`): AI output Zod validation, route helper duplication (now `lib/ai-client.ts`), Gemma `systemInstruction` (folded into contents), OpenRouter timeout, `details: error` leak.
+Fixed 2026-09-05 (task `09-05-p1-quality-refactor`): Tailwind typography + tw-animate-css loaded (`prose`/`animate-in` now generate real CSS), `sanitizeInput` redesigned to injection-phrase patterns (benign "instruction"/"bypass" no longer blocked), archive upload validated with `exportedDreamSchema`, i18n drift fixed (archive themes heading on `t()`, `crisis-stop.tsx` on `crisis_*` keys, zh typo, typed `t()` without `@ts-ignore`).
 
 ## Discipline
 
