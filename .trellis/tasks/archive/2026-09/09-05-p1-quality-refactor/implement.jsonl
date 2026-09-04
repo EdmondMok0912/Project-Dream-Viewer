@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Gates, forbidden patterns (inline ternaries, any/@ts-ignore, alert), and the known-debt rows this task closes (prose/animate no-ops, sanitizeInput redesign, i18n drift, unused crisis_* keys)"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Zod-as-source-of-truth rule that R4 (exportedDreamSchema, z.infer ExportedDream) must follow"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "i18n t() usage rules and component conventions for i18n-provider/crisis-stop/archive page edits"}
+{"file": ".trellis/spec/backend/ai-api-guidelines.md", "reason": "Documents the sanitizeInput gate and 400 contract that R2 must keep byte-identical"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Reuse existing crisis_* keys and schemas instead of adding parallel copies"}
