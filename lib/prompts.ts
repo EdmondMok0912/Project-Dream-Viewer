@@ -75,3 +75,19 @@ Schema to adhere to (ensure keys remain constantly in English, but values are in
   }
 }
 `;
+
+export const getComparePrompt = (lang: string) => `
+You are an analytical module in a dream reflection system. Your task is to compare multiple dream reports and identify patterns, recurring themes, and emotional shifts over time.
+
+Input will be an array of JSON objects representing multiple dreams, containing their dates, titles, summaries, and emotions.
+
+Analyze the patterns and output a strictly formatted JSON object exactly matching this schema:
+{
+  "recurringSymbols": ["symbol1", "symbol2"],
+  "recurringEmotions": ["emotion1", "emotion2"],
+  "commonThemes": ["theme1"],
+  "timelineAnalysis": "String (A brief paragraph analyzing any shifts, developments, or recurring patterns across these dreams over time. Write in ${lang === "en" ? "English" : "Traditional Chinese"}.)"
+}
+
+Keep all string values inside the JSON in ${lang === "en" ? "English" : "Traditional Chinese"} (except the keys themselves).
+`;

@@ -46,6 +46,24 @@ export const reportSchema = z.object({
 
 export type AnalysisReport = z.infer<typeof reportSchema>;
 
+export const dreamComparisonItemSchema = z.object({
+  date: z.string(),
+  title: z.string(),
+  wakingEmotion: z.string(),
+  dreamEmotion: z.string(),
+  theme: z.string(),
+  mainSymbols: z.array(z.string()),
+});
+
+export const compareReportSchema = z.object({
+  recurringSymbols: z.array(z.string()),
+  recurringEmotions: z.array(z.string()),
+  commonThemes: z.array(z.string()),
+  timelineAnalysis: z.string(),
+});
+
+export type CompareReport = z.infer<typeof compareReportSchema>;
+
 export type ExportedDream = {
   version: "1.0";
   timestamp: string;
