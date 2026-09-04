@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "localStorage privacy rule that R-persistence is excluded by; mount-guard pattern for any localStorage read; AppState machine rule for page.tsx notice state"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "i18n strict rules, a11y minimums (dialog/aria), alert migration-when-touched rule this task implements"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Forbidden patterns (alert/confirm, ternaries) and the debt rows this task retires"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Typed t() key union — new keys must exist in both languages or tsc fails"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Unifying duplicate error wording into shared error_* keys instead of parallel per-page keys"}
