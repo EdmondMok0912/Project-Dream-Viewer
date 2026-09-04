@@ -35,5 +35,7 @@ Request path (both routes): `content-length > 3MB` → 413 · language from `x-a
 
 ## Verification
 
+- `npm test` — automated contract tests exist (vitest **3.2.7**, pinned to the 3.x line: the bare `latest` tag resolves to breaking vitest 5.0.0, which peers on `@types/node@^22 || >=24` and conflicts with the project's `@types/node: ^20` — do not unpin without bumping that dependency deliberately). Suite: `tests/api/` (`analyze.test.ts`, `compare.test.ts`, shared fixtures in `helpers.ts`), mirroring the Route-Level Contract above. Hermetic: passes with no API keys and no network.
+- **Test mock boundary**: only `generateJsonWithFallback` is mocked (`vi.mock("@/lib/ai-client", async (importOriginal) => ...)` spread keeps `sanitizeInput`, prompts, and schemas real — that wiring is part of the contract). When changing a route's behavior, extend the matching matrix in `tests/api/`; when changing AI-output schemas in `lib/schemas.ts`, update fixtures in `tests/api/helpers.ts` in the same change.
 - `npx tsc --noEmit && npm run lint && npm run build` must all pass.
-- No automated tests exist yet; before deploying prompt/schema changes, smoke-test both routes with a real key (AI Studio Cloud Run injects `GEMINI_API_KEY`). When adding the first test file, wire `node:test` or vitest into `package.json`.
+- Real-key smoke tests remain a deploy-time step only (AI Studio Cloud Run injects `GEMINI_API_KEY`); they are no longer the primary guard for prompt/schema changes — the contract tests are.
