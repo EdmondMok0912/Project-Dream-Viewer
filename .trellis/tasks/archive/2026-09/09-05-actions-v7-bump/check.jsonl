@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/backend/ai-api-guidelines.md", "reason": "Verify the gate steps and their order are untouched by the version bump"}
+{"file": ".trellis/spec/guides/index.md", "reason": "Reviewer false-positive patterns before flagging workflow changes"}
