@@ -50,3 +50,25 @@ Two lightweight Trellis tasks delivered. (1) 09-05-vitest5-upgrade (PR #2): vite
 ### Status
 
 [OK] **Completed**
+
+
+## Session 3: Bump GitHub Actions v4 to v7
+<!-- trellis-session: v=2 fp=ea4fe8799409a019 -->
+
+**Date**: 2026-09-05
+**Task**: Bump GitHub Actions v4 to v7
+**Branch**: `main`
+
+### Summary
+
+Tiny CI chore (task 09-05-actions-v7-bump, PR #4): actions/checkout and actions/setup-node v4 -> v7 (latest stable verified live via GitHub API: 7.0.1 / 7.0.0; v5 already superseded, skipped straight to v7). PR CI run green with no Node.js 20 deprecation annotation. Two-line diff; no input/trigger/step changes.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `dd2e2b6` | ci: bump actions/checkout and actions/setup-node v4 to v7 (#4) |
+
+### Status
+
+[OK] **Completed**
