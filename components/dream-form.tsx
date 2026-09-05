@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { dreamInputSchema, DreamInput } from "@/lib/schemas";
 import { Button } from "./ui/button";
@@ -38,7 +38,8 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
+    getValues,
     reset,
     setValue,
     formState: { errors },
@@ -61,7 +62,7 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
 
   const DRAFT_KEY = "dream_form_draft";
 
-  const formValues = watch();
+  const formValues = useWatch({ control });
 
   const [draftNotice, setDraftNotice] = React.useState<"saved" | "cleared" | null>(null);
   const [confirmingClear, setConfirmingClear] = React.useState(false);
@@ -113,7 +114,7 @@ export function DreamForm({ onSubmit, isSubmitting }: DreamFormProps) {
   };
 
   const handleManualSave = () => {
-    const values = watch();
+    const values = getValues();
     localStorage.setItem(DRAFT_KEY, JSON.stringify(values));
     setDraftNotice("saved");
   };
