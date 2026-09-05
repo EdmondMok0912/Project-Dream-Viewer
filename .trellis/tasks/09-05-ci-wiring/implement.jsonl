@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/backend/ai-api-guidelines.md", "reason": "The four verification commands CI must run and the manual smoke-test step the runbook documents"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend conventions for the dream-form.tsx getValues lint fix"}

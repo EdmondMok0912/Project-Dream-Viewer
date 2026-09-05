@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/backend/ai-api-guidelines.md", "reason": "Verify CI runs the documented gate commands unchanged"}
+{"file": ".trellis/spec/guides/index.md", "reason": "Reviewer false-positive patterns for judging the lint fix"}
