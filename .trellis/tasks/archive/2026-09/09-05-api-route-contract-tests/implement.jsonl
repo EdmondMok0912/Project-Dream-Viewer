@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend spec entry point: route inventory and where AI API conventions live"}
+{"file": ".trellis/spec/backend/ai-api-guidelines.md", "reason": "The exact route-level contract (status codes, exact bodies, error mapping) the tests must assert, plus verification commands"}

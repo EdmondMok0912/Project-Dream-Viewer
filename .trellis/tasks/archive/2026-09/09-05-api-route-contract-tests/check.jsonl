@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/backend/ai-api-guidelines.md", "reason": "Verify tests assert the documented contract bodies verbatim and the verification gate passes"}
+{"file": ".trellis/spec/guides/index.md", "reason": "Review-verification patterns incl. tautological-test rule for judging test quality"}
