@@ -37,5 +37,5 @@ Rider (user-requested 「順手修」): fix the one pre-existing ESLint warning 
 ## Key Decisions
 
 - D1. Node 24 in CI (matches local dev v24.16.0; satisfies vitest 5 floor ≥ 22.12).
-- D2. Lint fix = `getValues()` swap, not an eslint-disable and not `useWatch` (an event handler needs a non-reactive read; `useWatch` would add re-renders for nothing).
+- D2. Lint fix = `getValues()` swap for the handler call site, not an eslint-disable. **Resolution note (implementation)**: the PRD premise that the render-time `watch()` at line 64 does not warn was false — `react-hooks/incompatible-library` (eslint-plugin-react-hooks 7.1.1) flags every `useForm().watch` call and reports the first hit, so fixing the handler relocated the warning to the render subscription. `formValues` is load-bearing (autosave effect + ~11 WordCount sites), so the render subscription was switched to the rule-sanctioned `useWatch({ control })` — tsc passed with zero call-site changes (`WordCount.text` is already `text?: string`). End state: 0 errors, 0 warnings, no behavior change.
 - D3. Triggers: all PRs + push to `main` only (no full matrix on every branch push).
